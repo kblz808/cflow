@@ -27,3 +27,9 @@ type Payment struct {
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
+
+type CreatePaymentRequest struct {
+	Amount    float64 `json:"amount" validate:"required,gt=0"`
+	Currency  string  `json:"currency" validate:"required,oneof=ETB USD"`
+	Reference string  `json:"reference" validate:"required"`
+}
