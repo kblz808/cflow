@@ -33,3 +33,11 @@ type CreatePaymentRequest struct {
 	Currency  string  `json:"currency" validate:"required,oneof=ETB USD"`
 	Reference string  `json:"reference" validate:"required"`
 }
+
+type GetPaymentResponse struct {
+	Amount    float64   `json:"amount"`
+	Currency  Currency  `json:"currency"`
+	Reference string    `json:"reference"`
+	Status    Status    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}

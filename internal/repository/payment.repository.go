@@ -3,6 +3,7 @@ package repository
 import (
 	"cflow/internal/models"
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -61,4 +62,23 @@ func (repo *PaymentRepository) GetPaymentByID(ctx context.Context, id uuid.UUID)
 	}
 
 	return &payment, nil
+}
+
+func (repo *PaymentRepository) UpdatePaymentStatus(ctx context.Context, id uuid.UUID, status models.Status) error {
+	query := repo.db.QueryBuilder.Update("payments").
+		Set("status", status).
+		Set("updated_at", time.Now()).
+		Where("id = ?", id)
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return err
+	}
+
+	_, err = repo.db.Exec(ctx, sql, args...)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

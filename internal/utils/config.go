@@ -1,8 +1,9 @@
 package utils
 
 import (
-	"github.com/joho/godotenv"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type DBConfig struct {
@@ -19,6 +20,8 @@ type RabbitMQConfig struct {
 	Port     string
 	Username string
 	Password string
+
+	QueueName string
 }
 
 func NewDBConfig() (*DBConfig, error) {

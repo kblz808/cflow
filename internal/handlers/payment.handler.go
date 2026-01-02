@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -39,4 +40,25 @@ func (h *PaymentHandler) CreatePayment(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, paymentRequest)
+}
+
+func (h *PaymentHandler) GetPaymentByID(c echo.Context) error {
+	ctx := c.Request().Context()
+
+	id := c.Param("id")
+	if id == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "id is required")
+	}
+
+	uuid, err := uuid.Parse(id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
+	}
+
+	payment, err := h.svc.GetPayment(ctx, uuid)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, payment)
 }
