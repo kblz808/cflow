@@ -12,11 +12,13 @@ import (
 
 type PaymentService struct {
 	repo *repository.PaymentRepository
+	mq   *MessageQueueService
 }
 
-func NewPaymentService(repo *repository.PaymentRepository) *PaymentService {
+func NewPaymentService(repo *repository.PaymentRepository, mq *MessageQueueService) *PaymentService {
 	return &PaymentService{
 		repo: repo,
+		mq:   mq,
 	}
 }
 
@@ -30,7 +32,12 @@ func (s *PaymentService) CreatePayment(ctx context.Context, paymentRequest *mode
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
-	return s.repo.CreatePayment(ctx, &payment)
+
+	if err := s.repo.CreatePayment(ctx, &payment); err != nil {
+		return err
+	}
+
+	return s.mq.PublishPaymentEvent(ctx, payment.ID.String())
 }
 
 func (s *PaymentService) GetPayment(ctx context.Context, id uuid.UUID) (*models.GetPaymentResponse, error) {
@@ -81,4 +88,18 @@ func (s *PaymentService) MarkPaymentAsFailed(ctx context.Context, id string) err
 	}
 
 	return s.repo.UpdatePaymentStatus(ctx, paymentID, models.StatusFailed)
+}
+
+func (s *PaymentService) GetPaymentStatus(ctx context.Context, id string) (models.Status, error) {
+	paymentID, err := uuid.Parse(id)
+	if err != nil {
+		return "", fmt.Errorf("invalid id: %w", err)
+	}
+
+	payment, err := s.repo.GetPaymentByID(ctx, paymentID)
+	if err != nil {
+		return "", fmt.Errorf("failed to get payment: %w", err)
+	}
+
+	return payment.Status, nil
 }

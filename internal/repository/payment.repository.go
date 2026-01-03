@@ -12,8 +12,8 @@ type PaymentRepository struct {
 	db *DB
 }
 
-func NewPaymentRepository(db *DB) PaymentRepository {
-	return PaymentRepository{db}
+func NewPaymentRepository(db *DB) *PaymentRepository {
+	return &PaymentRepository{db}
 }
 
 func (repo *PaymentRepository) CreatePayment(ctx context.Context, payment *models.Payment) error {

@@ -2,6 +2,10 @@ services:
   db:
     image: postgres:18
     container_name: cashflow_db
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
     ports:
       - "5432:5432"
     volumes:
@@ -10,6 +14,9 @@ services:
     image: rabbitmq:4-management
     container_name: message_broker
     restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${MQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${MQ_PASSWORD}
     ports:
       - "5672:5672"
       - "15672:15672"

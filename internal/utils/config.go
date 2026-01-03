@@ -49,10 +49,11 @@ func NewMQConfig() (*RabbitMQConfig, error) {
 	}
 
 	mq := RabbitMQConfig{
-		Host:     os.Getenv("MQ_HOST"),
-		Port:     os.Getenv("MQ_PORT"),
-		Username: os.Getenv("MQ_USER"),
-		Password: os.Getenv("MQ_PASSWORD"),
+		Host:      os.Getenv("MQ_HOST"),
+		Port:      os.Getenv("MQ_PORT"),
+		Username:  os.Getenv("MQ_USER"),
+		Password:  os.Getenv("MQ_PASSWORD"),
+		QueueName: os.Getenv("MQ_QUEUE"),
 	}
 
 	return &mq, nil
