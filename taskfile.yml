@@ -15,10 +15,26 @@ tasks:
     cmd: go run cmd/worker/main.go
   dev:
     desc: Run both API and Worker in parallel
-    deps: [db:up, rabbitmq:up]
+    deps: [build, db:up, mq:up]
     cmds:
-      - task: api
-      - task: worker
+      - ./bin/api
+      - ./bin/worker
+    parallel: true
+  build:
+    desc: Build the API and Worker binaries
+    cmds:
+      - go build -o bin/api cmd/api/main.go
+      - go build -o bin/worker cmd/worker/main.go
+  clean:
+    desc: Remove built binaries
+    cmds:
+      - rm -rf bin/
+  prod:
+    desc: Run the production binaries
+    deps: [build, db:up, mq:up]
+    cmds:
+      - ./bin/api
+      - ./bin/worker
     parallel: true
   install:
     cmd: go mod tidy

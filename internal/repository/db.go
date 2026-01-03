@@ -5,8 +5,6 @@ import (
 	"context"
 	"embed"
 	"errors"
-	"fmt"
-	"log"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -27,13 +25,16 @@ type DB struct {
 }
 
 func NewDB(ctx context.Context, config *utils.DBConfig) (*DB, error) {
-	url := fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=disable",
-		config.Connection, config.Username, config.Password, config.Host, config.Port, config.Name,
-	)
+	url := config.DSN()
 
-	log.Println(url)
+	poolConfig, err := pgxpool.ParseConfig(url)
+	if err != nil {
+		return nil, err
+	}
 
-	db, err := pgxpool.New(ctx, url)
+	poolConfig.MaxConns = int32(config.MaxConns)
+
+	db, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		return nil, err
 	}

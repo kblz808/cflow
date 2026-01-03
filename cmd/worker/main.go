@@ -9,7 +9,6 @@ import (
 	"errors"
 	"log"
 	"math/rand"
-	"time"
 )
 
 func main() {
@@ -43,8 +42,6 @@ func main() {
 	handler := func(ctx context.Context, event services.PaymentEvent) (bool, error) {
 		log.Printf("Processing payment: %s", event.PaymentID)
 
-		time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
-
 		targetStatus := models.StatusSuccess
 		if rand.Float32() >= 0.5 {
 			targetStatus = models.StatusFailed
@@ -68,8 +65,7 @@ func main() {
 		return true, nil
 	}
 
-	workerCount := 10
-	if err := mqClient.ConsumePayment(ctx, workerCount, handler); err != nil {
+	if err := mqClient.ConsumePayment(ctx, mqConfig.WorkerCount, handler); err != nil {
 		log.Fatalf("consumer error: %v", err)
 	}
 }

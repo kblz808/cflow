@@ -55,12 +55,12 @@ func (h *PaymentHandler) GetPaymentByID(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, "id is required")
 	}
 
-	uuid, err := uuid.Parse(id)
+	paymentID, err := uuid.Parse(id)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusBadRequest, "invalid id")
 	}
 
-	payment, err := h.svc.GetPayment(ctx, uuid)
+	payment, err := h.svc.GetPayment(ctx, paymentID)
 	if err != nil {
 		if errors.Is(err, repository.ErrPaymentNotFound) {
 			return echo.NewHTTPError(http.StatusNotFound, "payment not found")
