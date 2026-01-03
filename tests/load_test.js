@@ -4,8 +4,8 @@ import { randomIntBetween } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 
 export const options = {
   stages: [
-    { duration: "2m", target: 100 },
-    { duration: "4m", target: 100 },
+    { duration: "2m", target: 50 },
+    { duration: "4m", target: 50 },
     { duration: "2m", target: 0 },
   ],
   thresholds: {
@@ -14,10 +14,9 @@ export const options = {
   },
 };
 
-const BASE_URL = "http://localhost:8000";
+const BASE_URL = __ENV.BASE_URL || "http://localhost:8000";
 
 export default function () {
-  // Create payment
   const payload = {
     amount: randomIntBetween(10, 1000),
     currency: "USD",

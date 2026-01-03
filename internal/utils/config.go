@@ -35,10 +35,7 @@ type RabbitMQConfig struct {
 }
 
 func NewDBConfig() (*DBConfig, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
+	_ = godotenv.Load()
 
 	db := DBConfig{
 		Connection: os.Getenv("DB_CONNECTION"),
@@ -60,10 +57,7 @@ func NewDBConfig() (*DBConfig, error) {
 }
 
 func NewMQConfig() (*RabbitMQConfig, error) {
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
+	_ = godotenv.Load()
 
 	mq := RabbitMQConfig{
 		Host:      os.Getenv("MQ_HOST"),

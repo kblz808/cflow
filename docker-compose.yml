@@ -9,6 +9,12 @@ services:
       - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
     image: rabbitmq:4-management
     restart: unless-stopped
@@ -20,7 +26,53 @@ services:
       - "15672:15672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    command: /app/api
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - MQ_HOST=rabbitmq
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  worker:
+    build: .
+    command: /app/worker
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=db
+      - MQ_HOST=rabbitmq
+    depends_on:
+      db:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  load_tester:
+    image: grafana/k6
+    volumes:
+      - ./tests:/tests
+    environment:
+      - BASE_URL=http://api:8000
+    command: run /tests/load_test.js
+    depends_on:
+      - api
 
 volumes:
   pg_data:
   rabbitmq_data:
+
