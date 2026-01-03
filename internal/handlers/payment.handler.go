@@ -2,7 +2,9 @@ package handlers
 
 import (
 	"cflow/internal/models"
+	"cflow/internal/repository"
 	"cflow/internal/services"
+	"errors"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -34,12 +36,15 @@ func (h *PaymentHandler) CreatePayment(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
 	}
 
-	err := h.svc.CreatePayment(ctx, &paymentRequest)
+	response, err := h.svc.CreatePayment(ctx, &paymentRequest)
 	if err != nil {
+		if errors.Is(err, repository.ErrDuplicateReference) {
+			return echo.NewHTTPError(http.StatusConflict, "duplicate reference")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, paymentRequest)
+	return c.JSON(http.StatusCreated, response)
 }
 
 func (h *PaymentHandler) GetPaymentByID(c echo.Context) error {
@@ -57,6 +62,9 @@ func (h *PaymentHandler) GetPaymentByID(c echo.Context) error {
 
 	payment, err := h.svc.GetPayment(ctx, uuid)
 	if err != nil {
+		if errors.Is(err, repository.ErrPaymentNotFound) {
+			return echo.NewHTTPError(http.StatusNotFound, "payment not found")
+		}
 		return echo.NewHTTPError(http.StatusInternalServerError, err.Error())
 	}
 

@@ -34,6 +34,11 @@ type CreatePaymentRequest struct {
 	Reference string  `json:"reference" validate:"required"`
 }
 
+type CreatePaymentResponse struct {
+	ID     uuid.UUID `json:"id"`
+	Status Status    `json:"status"`
+}
+
 type GetPaymentResponse struct {
 	Amount    float64   `json:"amount"`
 	Currency  Currency  `json:"currency"`

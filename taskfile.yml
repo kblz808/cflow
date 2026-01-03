@@ -1,0 +1,56 @@
+version: "3"
+
+vars:
+  DSN: "{{.DB_CONNECTION}}://{{.DB_USER}}:{{.DB_PASSWORD}}@{{.DB_HOST}}:{{.DB_PORT}}/{{.DB_NAME}}?sslmode=disable"
+
+dotenv:
+  - ".env"
+
+tasks:
+  api:
+    desc: Run the API service
+    cmd: go run cmd/api/main.go
+  worker:
+    desc: Run the worker service
+    cmd: go run cmd/worker/main.go
+  dev:
+    desc: Run both API and Worker in parallel
+    deps: [db:up, rabbitmq:up]
+    cmds:
+      - task: api
+      - task: worker
+    parallel: true
+  install:
+    cmd: go mod tidy
+  test:
+    cmd: go test ./... -v
+  test:repository:
+    cmd: go test ./tests/repository -v
+  test:service:
+    cmd: go test ./tests/services -v
+  db:up:
+    cmd: docker-compose -f docker-compose.yml up db -d
+  db:down:
+    cmd: docker-compose -f docker-compose.yml down -v
+  db:cli:
+    cmd: docker exec -it db sh -c "psql -U {{.DB_USER}} -d {{.DB_NAME}}"
+    requires:
+      vars:
+        - DB_USER
+        - DB_NAME
+  db:studio:
+    cmd: sql-studio postgres {{.DSN}}
+  mq:up:
+    cmd: docker-compose -f docker-compose.yml up rabbitmq -d
+  mq:down:
+    cmd: docker-compose -f docker-compose.yml down rabbitmq -v
+  migrate:up:
+    cmd: migrate -path ./internal/repository/migrations -database {{.DSN}} -verbose up {{.CLI_ARGS}}
+    requires:
+      vars:
+        - DSN
+  migrate:down:
+    cmd: migrate -path ./internal/repository/migrations -database {{.DSN}} --verbose down
+    requires:
+      vars:
+        - DSN

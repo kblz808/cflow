@@ -44,5 +44,5 @@ func main() {
 
 	router := handlers.NewRouter(handler)
 
-	log.Fatal(router.Start(":8080"))
+	log.Fatal(router.Start(":8000"))
 }

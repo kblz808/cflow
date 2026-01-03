@@ -1,10 +1,12 @@
 package main
 
 import (
+	"cflow/internal/models"
 	"cflow/internal/repository"
 	"cflow/internal/services"
 	"cflow/internal/utils"
 	"context"
+	"errors"
 	"log"
 	"math/rand"
 	"time"
@@ -43,36 +45,26 @@ func main() {
 
 		time.Sleep(time.Duration(rand.Intn(1000)) * time.Millisecond)
 
-		status, err := svc.GetPaymentStatus(ctx, event.PaymentID)
-		if err != nil {
-			log.Printf("Failed to get payment status: %v", err)
+		targetStatus := models.StatusSuccess
+		if rand.Float32() >= 0.5 {
+			targetStatus = models.StatusFailed
+		}
+
+		log.Printf("Attempting to mark payment %s as %s", event.PaymentID, targetStatus)
+		if err := svc.ChangePaymentStatus(ctx, event.PaymentID, targetStatus); err != nil {
+			if errors.Is(err, repository.ErrPaymentAlreadyProcessed) {
+				log.Printf("Payment %s is already processed, skipping", event.PaymentID)
+				return true, nil
+			}
+			if errors.Is(err, repository.ErrPaymentNotFound) {
+				log.Printf("Payment %s not found, skipping", event.PaymentID)
+				return true, nil
+			}
+			log.Printf("Failed to process payment %s: %v", event.PaymentID, err)
 			return false, err
 		}
 
-		if status == "SUCCESS" {
-			log.Printf("Payment %s is already SUCCESS", event.PaymentID)
-			return true, nil
-		}
-
-		if status == "FAILED" {
-			log.Printf("Payment %s is already FAILED", event.PaymentID)
-			return true, nil
-		}
-
-		if rand.Float32() < 0.5 {
-			log.Printf("Marking payment %s as SUCCESS", event.PaymentID)
-			if err := svc.MarkPaymentAsSuccess(ctx, event.PaymentID); err != nil {
-				log.Printf("Failed to mark payment %s as success: %v", event.PaymentID, err)
-				return false, err
-			}
-		} else {
-			log.Printf("Marking payment %s as FAILED", event.PaymentID)
-			if err := svc.MarkPaymentAsFailed(ctx, event.PaymentID); err != nil {
-				log.Printf("Failed to mark payment %s as failed: %v", event.PaymentID, err)
-				return false, err
-			}
-		}
-
+		log.Printf("Successfully marked payment %s as %s", event.PaymentID, targetStatus)
 		return true, nil
 	}
 

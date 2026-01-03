@@ -4,7 +4,9 @@ import (
 	"cflow/internal/utils"
 	"context"
 	"embed"
+	"errors"
 	"fmt"
+	"log"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5/pgconn"
@@ -28,6 +30,8 @@ func NewDB(ctx context.Context, config *utils.DBConfig) (*DB, error) {
 	url := fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=disable",
 		config.Connection, config.Username, config.Password, config.Host, config.Port, config.Name,
 	)
+
+	log.Println(url)
 
 	db, err := pgxpool.New(ctx, url)
 	if err != nil {
@@ -64,8 +68,11 @@ func (db *DB) Migrate() error {
 }
 
 func (db *DB) ErrorCode(err error) string {
-	pgErr := err.(*pgconn.PgError)
-	return pgErr.Code
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code
+	}
+	return ""
 }
 
 func (db *DB) Close() {
