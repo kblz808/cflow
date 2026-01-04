@@ -5,7 +5,7 @@ the app contains two binaries: api and worker, the api receives messages from cl
 
 > ___before running the application, make sure to copy the `.env.example` to `.env` and fill in the required values___
 
-then start the application use docker-compose
+then start the application use docker-compose, this will start the database, rabbitmq, api and worker containers
 ```bash
 docker-compose up --build
 ```
@@ -14,6 +14,26 @@ or using taskfile
 ```bash
 task app
 ```
+
+---
+if you have go installed in your system and dont want to use docker for the api and worker, then build the binaries using
+
+```bash
+go build -o bin/api cmd/api/main.go
+go build -o bin/worker cmd/worker/main.go
+```
+
+start the database and rabbitmq containers
+```bash
+docker-compose up db rabbitmq -d
+```
+
+then run the binaries
+```bash
+./bin/api
+./bin/worker
+```
+---
 
 by default the api server will be available on port __8000__ `http://localhost:8000`. which we can change in the `.env` `ECHO_PORT` variable
 
