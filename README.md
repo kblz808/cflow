@@ -19,7 +19,7 @@ by default the api server will be available on port __8000__ `http://localhost:8
 
 we can test the application by calling these endpoints:
 - `POST` `/payments` - to create payments
-    + request body:
+    + request body: json
     ```json
     {
         "amount": 100,
@@ -28,6 +28,16 @@ we can test the application by calling these endpoints:
     }
     ```
 - `GET` `/payments/{id}` - to get information about a payment using its id
+    + response type: json
+    ```json
+    {
+        "amount": 100,
+        "currency": "USD",
+        "reference": "arc0104-123456",
+        "status": "SUCCESS",
+        "created_at": "2026-01-04T07:27:04.123456Z"
+    }
+    ```
 
 ## scaling
 we can scale the application using 2 mechanisms.
@@ -56,7 +66,7 @@ stages: [
 
 we can run the load test using docker
 ```bash
-docker run --rm -i grafana/k6 run - <tests/load_test.js
+docker run --rm -i --network="host" grafana/k6 run - <tests/load_test.js
 ```
 
 or using taskfile

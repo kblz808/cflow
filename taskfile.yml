@@ -79,4 +79,4 @@ tasks:
 
   test:load:
     desc: run load tests using k6 in docker
-    cmd: docker run --rm -i grafana/k6 run - <tests/load_test.js
+    cmd: docker run --rm -i --network="host" grafana/k6 run - <tests/load_test.js
