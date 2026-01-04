@@ -1,15 +1,17 @@
 package handlers
 
 import (
+	"cflow/internal/utils"
+
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
 
-func NewRouter(paymentHandler *PaymentHandler) *echo.Echo {
+func NewRouter(config *utils.EchoConfig, paymentHandler *PaymentHandler) *echo.Echo {
 	e := echo.New()
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{"*"},
+		AllowOrigins: []string{config.AllowedOrigins},
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
 		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
 	}))

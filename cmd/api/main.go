@@ -17,6 +17,11 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
+	echoConfig, err := utils.NewEchoConfig()
+	if err != nil {
+		log.Fatalf("failed to load echo config: %v", err)
+	}
+
 	db, err := repository.NewDB(ctx, config)
 	if err != nil {
 		log.Fatalf("failed to connect to db: %v", err)
@@ -42,7 +47,7 @@ func main() {
 	svc := services.NewPaymentService(repo, mqClient)
 	handler := handlers.NewPaymentHandler(svc)
 
-	router := handlers.NewRouter(handler)
+	router := handlers.NewRouter(echoConfig, handler)
 
-	log.Fatal(router.Start(":8000"))
+	log.Fatal(router.Start(echoConfig.Port))
 }

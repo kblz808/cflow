@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS payments (
-    id         UUID PRIMARY KEY DEFAULT uuidv7(),
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     amount     NUMERIC(20, 8) NOT NULL CHECK (amount > 0),
     currency   VARCHAR(3)    NOT NULL CHECK (currency IN ('ETB', 'USD')),
     reference  VARCHAR(255)  NOT NULL,

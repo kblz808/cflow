@@ -47,6 +47,11 @@ tasks:
         - DB_NAME
   db:studio:
     cmd: sql-studio postgres {{.DSN}}
+  migrate:up:
+    cmd: migrate -path ./internal/repository/migrations -database {{.DSN}} -verbose up {{.CLI_ARGS}}
+    requires:
+      vars:
+        - DSN
   migrate:down:
     cmd: migrate -path ./internal/repository/migrations -database {{.DSN}} --verbose down
     requires:
@@ -57,11 +62,7 @@ tasks:
     cmd: docker-compose up rabbitmq -d
   mq:down:
     cmd: docker-compose down rabbitmq -v
-  migrate:up:
-    cmd: migrate -path ./internal/repository/migrations -database {{.DSN}} -verbose up {{.CLI_ARGS}}
-    requires:
-      vars:
-        - DSN
+
 
   api:up:
     cmd: docker-compose up api
@@ -74,10 +75,8 @@ tasks:
     cmd: docker-compose down worker -v
   
   app:
-    cmd: docker-compose up db mq api worker
+    cmd: docker-compose up --build
 
   test:load:
     desc: run load tests using k6 in docker
-    cmd: docker-compose run --rm load_tester
-
-
+    cmd: docker run --rm -i grafana/k6 run - <tests/load_test.js

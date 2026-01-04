@@ -63,7 +63,7 @@ func (repo *PaymentRepository) GetPaymentByID(ctx context.Context, id uuid.UUID)
 	}
 	defer tx.Rollback(ctx)
 
-	query := repo.db.QueryBuilder.Select("amount, currency, reference, status, created_at").
+	query := repo.db.QueryBuilder.Select("id, amount, currency, reference, status, created_at").
 		From("payments").
 		Where("id = ?", id)
 
@@ -74,6 +74,7 @@ func (repo *PaymentRepository) GetPaymentByID(ctx context.Context, id uuid.UUID)
 
 	var payment models.Payment
 	err = tx.QueryRow(ctx, sql, args...).Scan(
+		&payment.ID,
 		&payment.Amount,
 		&payment.Currency,
 		&payment.Reference,

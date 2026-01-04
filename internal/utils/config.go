@@ -34,6 +34,11 @@ type RabbitMQConfig struct {
 	WorkerCount int
 }
 
+type EchoConfig struct {
+	AllowedOrigins string
+	Port           string
+}
+
 func NewDBConfig() (*DBConfig, error) {
 	_ = godotenv.Load()
 
@@ -75,4 +80,15 @@ func NewMQConfig() (*RabbitMQConfig, error) {
 	mq.WorkerCount = workerCount
 
 	return &mq, nil
+}
+
+func NewEchoConfig() (*EchoConfig, error) {
+	_ = godotenv.Load()
+
+	echo := EchoConfig{
+		AllowedOrigins: os.Getenv("ECHO_ALLOWED_ORIGINS"),
+		Port:           fmt.Sprintf(":%s", os.Getenv("ECHO_PORT")),
+	}
+
+	return &echo, nil
 }

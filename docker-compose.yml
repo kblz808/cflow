@@ -62,16 +62,6 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  load_tester:
-    image: grafana/k6
-    volumes:
-      - ./tests:/tests
-    environment:
-      - BASE_URL=http://api:8000
-    command: run /tests/load_test.js
-    depends_on:
-      - api
-
 volumes:
   pg_data:
   rabbitmq_data:
